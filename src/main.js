@@ -1,7 +1,7 @@
 /*
  * @Author: 彭祥飞（pengXiangfei）
  * @Date: 2021-06-23 11:39:02
- * @LastEditTime: 2021-07-07 10:55:14
+ * @LastEditTime: 2021-08-27 16:32:38
  * @LastEditors: 彭祥飞（pengXiangfei）
  * @Description:
  */
@@ -12,11 +12,14 @@ import App from './App'
 import router from './router'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-// import VueDND from 'awe-dnd'
-// Vue.use(VueDND)
-Vue.use(ElementUI)
-Vue.config.productionTip = false
+import { get, post } from '@/assets/js/server.js'
+import animated from 'animate.css' // npm install animate.css --save安装，在引入
 
+Vue.prototype.$post = post
+Vue.prototype.$get = get
+Vue.use(ElementUI)
+Vue.use(animated)
+Vue.config.productionTip = false
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

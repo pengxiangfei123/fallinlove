@@ -1,7 +1,7 @@
 <!--
  * @Author: 彭祥飞（pengXiangfei）
  * @Date: 2021-08-04 16:01:30
- * @LastEditTime: 2021-08-09 17:23:19
+ * @LastEditTime: 2021-08-27 14:49:24
  * @LastEditors: 彭祥飞（pengXiangfei）
  * @Description:
 -->
@@ -115,14 +115,14 @@
           ></el-input>
         </el-form-item>
 
-        <el-form-item label="工作城市" prop="age">
+        <el-form-item label="工作城市" prop="workCity">
           <el-input
-            v-model="ruleForm.name"
+            v-model="ruleForm.workCity"
             size="mini"
             placeholder="请输入工作城市"
           ></el-input>
         </el-form-item>
-        <el-form-item label="择偶条件" prop="age">
+        <el-form-item label="择偶条件" prop="desc">
           <el-input
             type="textarea"
             v-model="ruleForm.desc"
@@ -165,7 +165,38 @@ export default {
   data () {
     return {
       tabPosition: 1,
-      rules: {},
+      rules: {
+        name: [
+          { required: true, message: '请输入姓名', trigger: 'blur' },
+          { min: 2, max: 5, message: '长度在 2 到 5 个字符', trigger: 'blur' }
+        ],
+        age: [{ required: true, message: '请输入年龄', trigger: 'blur' }],
+        iphone: [
+          { required: true, message: '请输入手机号码', trigger: 'blur' },
+          {
+            min: 10,
+            max: 13,
+            message: '长度在 10 到 13 个字符',
+            trigger: 'blur'
+          }
+        ]
+      },
+      ruleForm: {
+        name: '', // 姓名
+        age: '', // 年龄
+        gender: 1, // 性别
+        haveHouse: '', // 房产
+        haveCar: '', // 车辆
+        LevelOfBeauty: '', // 容貌评级
+        education: '', // 学历
+        moneyNumber: '', // 收入范围(月)
+        iphone: '', // 手机号码
+        height: '', // 身高
+        weight: '', // 体重
+        houseAddress: '', // 家庭地址
+        workCity: '', // 工作城市
+        criteria: '' // 择偶条件
+      },
       genderOptions: [
         { label: '男', value: 1 },
         { label: '女', value: 2 }
@@ -190,27 +221,78 @@ export default {
         { label: '15000~20000', value: 5 },
         { label: '20000以上', value: 6 }
       ],
-      ruleForm: {
-        name: '', // 姓名
-        age: '', // 年龄
-        gender: 1, // 性别
-        haveHouse: '', // 房产
-        haveCar: '', // 车辆
-        LevelOfBeauty: '', // 容貌评级
-        education: '', // 学历
-        moneyNumber: '', // 收入范围(月)
-        iphone: '', // 手机号码
-        height: '', // 身高
-        weight: '', // 体重
-        houseAddress: '', // 家庭地址
-        workCity: '', // 工作城市
-        criteria: '' // 择偶条件
-      },
       imageUrl: '',
       iphoneList: [{}, {}]
     }
   },
+  mounted () {
+    if (this.$route.query.userid) {
+      this.getUserDetail(this.$route.query.userid)
+    }
+  },
   methods: {
+    getUserDetail (userid) {
+      this.$post('http://tx6imx.natappfree.cc/marriage/qryMarriage', { userid })
+        .then((res) => {
+          console.log(res)
+          this.list = res.result
+        })
+        .catch((err) => {
+          if (err) {
+            throw err
+          }
+        })
+    },
+    submitForm (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          if (this.$route.query.userid) {
+            // 编辑
+            this.ruleForm.userid = this.$route.query.userid
+            this.$post(
+              'http://cpb939.natappfree.cc/marriage/updateMarriage',
+              this.ruleForm
+            )
+              .then((res) => {
+                if (res.status === 0) {
+                  console.log(res)
+                  this.$message.success('编辑成功')
+                  this.$router.back()
+                } else {
+                  this.$message.error(res.error.message)
+                }
+              })
+              .catch((err) => {
+                if (err) {
+                  throw err
+                }
+              })
+          } else {
+            // 新增
+            this.$post(
+              'http://tx6imx.natappfree.cc/marriage/addMarriage',
+              this.ruleForm
+            )
+              .then((res) => {
+                if (res.status === 0) {
+                  console.log(res)
+                  this.$message.success('新增成功')
+                } else {
+                  this.$message.error(res.error.message)
+                }
+              })
+              .catch((err) => {
+                if (err) {
+                  throw err
+                }
+              })
+          }
+        } else {
+          this.$message.error('输入有错误，请重新检查')
+          return false
+        }
+      })
+    },
     handleAvatarSuccess (res, file) {
       this.imageUrl = URL.createObjectURL(file.raw)
     },

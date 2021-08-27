@@ -1,7 +1,7 @@
 <!--
  * @Author: 彭祥飞（pengXiangfei）
  * @Date: 2021-06-23 14:01:22
- * @LastEditTime: 2021-08-09 16:39:12
+ * @LastEditTime: 2021-08-27 15:28:38
  * @LastEditors: 彭祥飞（pengXiangfei）
  * @Description:
 -->
@@ -19,8 +19,8 @@
         <span slot="title">首页</span>
       </el-menu-item>
       <el-menu-item index="2" @click="routerLink('/Information')">
-        <i class="el-icon-picture"></i>
-        <span slot="title">人才库</span>
+        <i class="el-icon-s-custom"></i>
+        <span slot="title">人才信息</span>
       </el-menu-item>
       <el-menu-item index="3" @click="routerLink('/InformationDetall')">
         <i class="el-icon-circle-plus"></i>

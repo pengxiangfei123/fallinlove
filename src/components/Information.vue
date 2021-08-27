@@ -1,7 +1,7 @@
 <!--
  * @Author: 彭祥飞（pengXiangfei）
  * @Date: 2021-06-23 14:27:49
- * @LastEditTime: 2021-08-09 16:57:53
+ * @LastEditTime: 2021-08-27 14:51:05
  * @LastEditors: 彭祥飞（pengXiangfei）
  * @Description: 数据
 -->
@@ -14,6 +14,7 @@
         class="select-width"
         placeholder="请选择性别"
         size="mini"
+        clearable
       >
         <el-option
           v-for="item in genderOptions"
@@ -29,6 +30,7 @@
         class="select-width"
         placeholder="请选择性别"
         size="mini"
+        clearable
       >
         <el-option
           v-for="item in moneyNumberOptions"
@@ -44,6 +46,7 @@
         class="select-width"
         placeholder="请选择容貌评级"
         size="mini"
+        clearable
       >
         <el-option
           v-for="item in LevelOfBeautyOptions"
@@ -59,6 +62,7 @@
         class="select-width"
         placeholder="请选择学历"
         size="mini"
+        clearable
       >
         <el-option
           v-for="item in educationOptions"
@@ -74,6 +78,7 @@
         class="select-width"
         placeholder="请选择房产"
         size="mini"
+        clearable
       >
         <el-option
           v-for="item in isOptions"
@@ -89,6 +94,7 @@
         class="select-width"
         placeholder="请选择车辆"
         size="mini"
+        clearable
       >
         <el-option
           v-for="item in isOptions"
@@ -128,28 +134,62 @@
       >
       </el-input>
 
+      <span>姓名：</span>
+      <el-input
+        placeholder="请输入姓名"
+        v-model="formData.name"
+        class="select-width"
+        clearable
+        size="mini"
+      >
+      </el-input>
+      <el-button type="primary" class="btns" @click="getTableData" size="mini"
+        >开始搜索 <i class="el-icon-search"></i></el-button
+      >
     </div>
-      <ul class="list">
-        <li v-for="(item,index) in list" :key="index" @click="InformationDetall">
-          <div class="photo">
-            <img
-              src="../assets/image/girl.jpg"
-              alt=""
-            />
-          </div>
-          <div class="info">
-            <p class="nick">
-              <span>张思德</span>
-            </p>
-            <p class="view">
-              <span>36岁</span>
-              <span>180</span>
-              <span>河南商丘</span>
-            </p>
-            <div class="heart">我想要的不多，一个懂感恩，理解以及温柔的她</div>
-          </div>
-        </li>
-      </ul>
+
+    <el-table :data="list" style="width: 100%; margintop: 12px">
+      <el-table-column prop="name" align="center" label="姓名" width="80">
+      </el-table-column>
+      <el-table-column prop="age" align="center" label="年龄" width="80">
+      </el-table-column>
+      <el-table-column prop="gender" align="center" label="性别" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.gender == 1 ? '男' : '女' }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="age" align="center" label="等级标准" width="120">
+        <template slot-scope="scope">
+          <span>
+            {{ filters(scope.row.levelOfBeauty, LevelOfBeautyOptions) }}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" prop="education" label="学历" width="150">
+        <template slot-scope="scope">
+          <span>
+            {{ filters(scope.row.education, educationOptions) }}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="height" align="center" label="身高" width="100">
+      </el-table-column>
+      <el-table-column align="center" prop="moneyNumber" label="收入范围">
+        <template slot-scope="scope">
+          <span> {{ filters(scope.row.moneyNumber, moneyNumberOptions) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" prop="houseAddress" label="家庭地址">
+      </el-table-column>
+      <el-table-column label="操作" width="120">
+        <template slot-scope="scope">
+          <span>
+            <el-button size="small" @click="edit(scope.row)" type="text"> 编辑 </el-button>
+            <el-button size="small" @click="deletes(scope.row)" type="text"> 删除 </el-button>
+          </span>
+        </template>
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 
@@ -186,6 +226,7 @@ export default {
         { label: '20000以上', value: 6 }
       ],
       formData: {
+        name: '',
         gender: 1,
         ageMin: '',
         ageMan: '',
@@ -199,14 +240,73 @@ export default {
         haveHouse: '',
         haveCar: ''
       },
-      list: [
-        {},
-        {},
-        {},
-        {}, {}, {}, {}, {}, {}, {}, {}, {} ]
+      list: []
     }
   },
+  mounted () {
+    this.getTableData()
+  },
   methods: {
+    edit (row) {
+      this.$router.push({
+        path: '/InformationDetall',
+        query: {
+          userid: row.userid
+        }
+      })
+    },
+    deletes (row) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$post(
+          'http://cpb939.natappfree.cc/marriage/updateMarriage',
+          {
+            'userid': row.userid,
+            'isState': 'D'
+          }
+        )
+          .then((res) => {
+            this.$message.success('操作成功')
+          })
+          .catch((err) => {
+            if (err) {
+              throw err
+            }
+          })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    getTableData () {
+      this.$post(
+        'http://tx6imx.natappfree.cc/marriage/qryMarriage',
+        this.formData
+      )
+        .then((res) => {
+          console.log(res)
+          this.list = res.result
+        })
+        .catch((err) => {
+          if (err) {
+            throw err
+          }
+        })
+    },
+    filters (value, options) {
+      let text = ''
+      options.forEach((item) => {
+        if (item.value === value) {
+          text = item.label
+        }
+      })
+      return text
+    },
     InformationDetall () {
       this.$router.push('/InformationDetall')
     }
@@ -217,7 +317,8 @@ export default {
 <style scoped lang="scss">
 .header {
   font-size: 14px;
-  line-height: 45px;
+  // line-height: 45px;
+  height: 45px;
   span {
     margin-right: 10px;
     margin-left: 10px;
@@ -232,45 +333,7 @@ export default {
 .borderB {
   border-bottom: 1px solid #ccc;
 }
-.list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  list-style: none;
-  li {
-    width: 200px;
-    height: 350px;
-    margin: 20px;
-    border-radius: 10px;
-    padding: 10px 10px 20px;
-    // box-shadow: 0px 5px 5px #e2e1e0;
-    border: 1px dotted #ccc;
-    cursor: pointer;
-    .photo {
-      position: relative;
-      width: 100%;
-      height: 210px;
-      overflow: hidden;
-      img {
-        width: 100%;
-        cursor: pointer;
-      }
-    }
-    p {
-      overflow: hidden;
-            margin: 0;
-    }
-    .nick {
-      font-size: 18px;
-      line-height: 40px;
-    }
-    .view {
-      line-height: 24px;
-      color: #333;
-    }
-    .heart {
-      height: 40px;
-    }
-  }
+.btns {
+  margin-left: 12px;
 }
 </style>
